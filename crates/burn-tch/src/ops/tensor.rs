@@ -474,4 +474,22 @@ impl<E: TchElement> FloatTensorOps<Self> for LibTorch<E> {
     ) -> burn_tensor::ops::FloatTensor<Self, D> {
         TchOps::permute(tensor, axes)
     }
+
+    fn float_floor<const D: usize>(
+        tensor: burn_tensor::ops::FloatTensor<Self, D>,
+    ) -> burn_tensor::ops::FloatTensor<Self, D> {
+        tensor.unary_ops(|mut tensor| tensor.floor_(), |tensor| tensor.floor())
+    }
+
+    fn float_ceil<const D: usize>(
+        tensor: burn_tensor::ops::FloatTensor<Self, D>,
+    ) -> burn_tensor::ops::FloatTensor<Self, D> {
+        tensor.unary_ops(|mut tensor| tensor.ceil_(), |tensor| tensor.ceil())
+    }
+
+    fn float_round<const D: usize>(
+        tensor: burn_tensor::ops::FloatTensor<Self, D>,
+    ) -> burn_tensor::ops::FloatTensor<Self, D> {
+        tensor.unary_ops(|mut tensor| tensor.round_(), |tensor| tensor.round())
+    }
 }

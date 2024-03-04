@@ -1303,4 +1303,8 @@ pub trait FloatTensorOps<B: Backend> {
         let sum = B::float_sum_dim(B::bool_into_float(bool_tensor), dim);
         B::float_equal_elem(sum, (num_elems as f32).elem())
     }
+
+    fn float_floor<const D: usize>(tensor: FloatTensor<B, D>) -> FloatTensor<B, D>;
+    fn float_ceil<const D: usize>(tensor: FloatTensor<B, D>) -> FloatTensor<B, D>;
+    fn float_round<const D: usize>(tensor: FloatTensor<B, D>) -> FloatTensor<B, D>;
 }

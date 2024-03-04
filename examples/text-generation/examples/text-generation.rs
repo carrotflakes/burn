@@ -10,7 +10,7 @@ type Backend = burn::backend::Autodiff<burn::backend::LibTorch<Elem>>;
 
 fn main() {
     let config = ExperimentConfig::new(
-        burn::nn::transformer::TransformerEncoderConfig::new(384, 1536, 12, 6)
+        text_generation::transformer::TransformerEncoderConfig::new(384, 1536, 12, 6)
             .with_norm_first(true),
         burn::optim::AdamConfig::new().with_weight_decay(Some(WeightDecayConfig::new(1.0e-6))),
     );

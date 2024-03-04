@@ -493,4 +493,22 @@ impl<E: FloatNdArrayElement> FloatTensorOps<Self> for NdArray<E> {
         let array = tensor.array.permuted_axes(axes.into_dimension());
         NdArrayTensor { array }
     }
+
+    fn float_floor<const D: usize>(
+        _tensor: burn_tensor::ops::FloatTensor<Self, D>,
+    ) -> burn_tensor::ops::FloatTensor<Self, D> {
+        todo!()
+    }
+
+    fn float_ceil<const D: usize>(
+        _tensor: burn_tensor::ops::FloatTensor<Self, D>,
+    ) -> burn_tensor::ops::FloatTensor<Self, D> {
+        todo!()
+    }
+
+    fn float_round<const D: usize>(
+        _tensor: burn_tensor::ops::FloatTensor<Self, D>,
+    ) -> burn_tensor::ops::FloatTensor<Self, D> {
+        todo!()
+    }
 }

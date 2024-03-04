@@ -1846,4 +1846,61 @@ impl<B: FusionBackend> FloatTensorOps<Self> for Fusion<B> {
 
         out
     }
+
+    fn float_floor<const D: usize>(tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
+        unary_float_ops!(FloorOps, B::float_floor);
+
+        let stream = tensor.stream;
+        let out = tensor.client.tensor_uninitialized(tensor.shape.clone());
+
+        let desc = UnaryOperationDescription {
+            input: tensor.into_description(),
+            out: out.to_description_out(),
+        };
+        out.client.register(
+            vec![stream],
+            OperationDescription::NumericFloat(NumericOperationDescription::Floor(desc.clone())),
+            FloorOps::<D>::new(desc),
+        );
+
+        out
+    }
+
+    fn float_ceil<const D: usize>(tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
+        unary_float_ops!(CeilOps, B::float_ceil);
+
+        let stream = tensor.stream;
+        let out = tensor.client.tensor_uninitialized(tensor.shape.clone());
+
+        let desc = UnaryOperationDescription {
+            input: tensor.into_description(),
+            out: out.to_description_out(),
+        };
+        out.client.register(
+            vec![stream],
+            OperationDescription::NumericFloat(NumericOperationDescription::Ceil(desc.clone())),
+            CeilOps::<D>::new(desc),
+        );
+
+        out
+    }
+
+    fn float_round<const D: usize>(tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
+        unary_float_ops!(RoundOps, B::float_round);
+
+        let stream = tensor.stream;
+        let out = tensor.client.tensor_uninitialized(tensor.shape.clone());
+
+        let desc = UnaryOperationDescription {
+            input: tensor.into_description(),
+            out: out.to_description_out(),
+        };
+        out.client.register(
+            vec![stream],
+            OperationDescription::NumericFloat(NumericOperationDescription::Round(desc.clone())),
+            RoundOps::<D>::new(desc),
+        );
+
+        out
+    }
 }

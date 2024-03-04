@@ -399,6 +399,21 @@ pub enum NumericOperationDescription<E> {
     /// Float => [powf](burn_tensor::ops::FloatTensorOps::float_powf).
     /// Int => [powf](burn_tensor::ops::IntTensorOps::int_powf).
     Powf(BinaryOperationDescription),
+    /// Operation corresponding to:
+    ///
+    /// Float => [floor](burn_tensor::ops::FloatTensorOps::float_floor).
+    /// Int => [floor](burn_tensor::ops::IntTensorOps::int_floor).
+    Floor(UnaryOperationDescription),
+    /// Operation corresponding to:
+    ///
+    /// Float => [ceil](burn_tensor::ops::FloatTensorOps::float_ceil).
+    /// Int => [ceil](burn_tensor::ops::IntTensorOps::int_ceil).
+    Ceil(UnaryOperationDescription),
+    /// Operation corresponding to:
+    ///
+    /// Float => [round](burn_tensor::ops::FloatTensorOps::float_round).
+    /// Int => [round](burn_tensor::ops::IntTensorOps::int_round).
+    Round(UnaryOperationDescription),
 }
 
 /// Operation description specific to an int tensor.
@@ -1165,6 +1180,15 @@ impl<E: Element> NumericOperationDescription<E> {
             NumericOperationDescription::Powf(desc) => {
                 vec![&desc.lhs, &desc.rhs, &desc.out]
             }
+            NumericOperationDescription::Floor(desc) => {
+                vec![&desc.input, &desc.out]
+            }
+            NumericOperationDescription::Ceil(desc) => {
+                vec![&desc.input, &desc.out]
+            }
+            NumericOperationDescription::Round(desc) => {
+                vec![&desc.input, &desc.out]
+            }
         }
     }
 }
@@ -1378,6 +1402,9 @@ impl<E> core::hash::Hash for NumericOperationDescription<E> {
             NumericOperationDescription::Clamp(desc) => desc.hash(state),
             NumericOperationDescription::IntRandom(desc) => desc.hash(state),
             NumericOperationDescription::Powf(desc) => desc.hash(state),
+            NumericOperationDescription::Floor(desc) => desc.hash(state),
+            NumericOperationDescription::Ceil(desc) => desc.hash(state),
+            NumericOperationDescription::Round(desc) => desc.hash(state),
         }
     }
 }

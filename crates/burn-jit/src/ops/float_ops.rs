@@ -516,4 +516,16 @@ impl<R: Runtime> FloatTensorOps<Self> for JitBackend<R> {
     ) -> FloatTensor<Self, D> {
         permute(tensor, axes)
     }
+
+    fn float_floor<const D: usize>(_tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
+        todo!()
+    }
+
+    fn float_ceil<const D: usize>(_tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
+        todo!()
+    }
+
+    fn float_round<const D: usize>(_tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
+        todo!()
+    }
 }

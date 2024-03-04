@@ -1,10 +1,9 @@
 use crate::data::TrainingTextGenerationBatch;
+use crate::transformer::*;
 use burn::{
     nn::{
-        attention::generate_autoregressive_mask,
-        loss::CrossEntropyLossConfig,
-        transformer::{TransformerEncoder, TransformerEncoderConfig, TransformerEncoderInput},
-        Embedding, EmbeddingConfig, Linear, LinearConfig,
+        attention::generate_autoregressive_mask, loss::CrossEntropyLossConfig, Embedding,
+        EmbeddingConfig,
     },
     prelude::*,
     tensor::backend::AutodiffBackend,

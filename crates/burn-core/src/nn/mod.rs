@@ -16,6 +16,9 @@ pub mod pool;
 /// Transformer module
 pub mod transformer;
 
+pub mod bit_transformer;
+
+mod bit_linear;
 mod dropout;
 mod embedding;
 mod gelu;
@@ -29,6 +32,7 @@ mod relu;
 mod rnn;
 mod unfold;
 
+pub use bit_linear::*;
 pub use dropout::*;
 pub use embedding::*;
 pub use gelu::*;

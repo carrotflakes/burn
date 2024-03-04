@@ -2350,6 +2350,120 @@ impl<B: Backend, C: CheckpointStrategy> FloatTensorOps<Self> for Autodiff<B, C> 
             OpsKind::UnTracked(prep) => prep.finish(B::float_powf(lhs.primitive, rhs.primitive)),
         }
     }
+
+    fn float_floor<const D: usize>(tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
+        #[derive(Debug)]
+        struct Floor;
+
+        retro_unary!(RetroFloor, B::float_floor);
+
+        impl<B: Backend, const D: usize> Backward<B, D, 1> for Floor {
+            type State = NodeID;
+
+            fn backward(
+                self,
+                ops: Ops<Self::State, 1>,
+                grads: &mut Gradients,
+                checkpointer: &mut Checkpointer,
+            ) {
+                let _tensor: B::FloatTensorPrimitive<D> =
+                    checkpointer.retrieve_node_output(ops.state);
+                unary::<B, D, D, _>(ops.parents, ops.node, grads, |grad| {
+                    grad
+                });
+            }
+        }
+
+        match Floor
+            .prepare::<C>([tensor.node.clone()], [tensor.graph.clone()])
+            .memory_bound()
+            .retro_forward(RetroFloor::<B, D>::new(tensor.node.id.clone()))
+            .parents([&tensor])
+            .stateful()
+        {
+            OpsKind::Tracked(mut prep) => {
+                let state = prep.checkpoint(&tensor);
+                prep.finish(state, B::float_floor(tensor.primitive))
+            }
+            OpsKind::UnTracked(prep) => prep.finish(B::float_floor(tensor.primitive)),
+        }
+    }
+
+    fn float_ceil<const D: usize>(tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
+        #[derive(Debug)]
+        struct Ceil;
+
+        retro_unary!(RetroCeil, B::float_ceil);
+
+        impl<B: Backend, const D: usize> Backward<B, D, 1> for Ceil {
+            type State = NodeID;
+
+            fn backward(
+                self,
+                ops: Ops<Self::State, 1>,
+                grads: &mut Gradients,
+                checkpointer: &mut Checkpointer,
+            ) {
+                let _tensor: B::FloatTensorPrimitive<D> =
+                    checkpointer.retrieve_node_output(ops.state);
+                unary::<B, D, D, _>(ops.parents, ops.node, grads, |grad| {
+                    grad
+                });
+            }
+        }
+
+        match Ceil
+            .prepare::<C>([tensor.node.clone()], [tensor.graph.clone()])
+            .memory_bound()
+            .retro_forward(RetroCeil::<B, D>::new(tensor.node.id.clone()))
+            .parents([&tensor])
+            .stateful()
+        {
+            OpsKind::Tracked(mut prep) => {
+                let state = prep.checkpoint(&tensor);
+                prep.finish(state, B::float_ceil(tensor.primitive))
+            }
+            OpsKind::UnTracked(prep) => prep.finish(B::float_ceil(tensor.primitive)),
+        }
+    }
+
+    fn float_round<const D: usize>(tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
+        #[derive(Debug)]
+        struct Round;
+
+        retro_unary!(RetroRound, B::float_round);
+
+        impl<B: Backend, const D: usize> Backward<B, D, 1> for Round {
+            type State = NodeID;
+
+            fn backward(
+                self,
+                ops: Ops<Self::State, 1>,
+                grads: &mut Gradients,
+                checkpointer: &mut Checkpointer,
+            ) {
+                let _tensor: B::FloatTensorPrimitive<D> =
+                    checkpointer.retrieve_node_output(ops.state);
+                unary::<B, D, D, _>(ops.parents, ops.node, grads, |grad| {
+                    grad
+                });
+            }
+        }
+
+        match Round
+            .prepare::<C>([tensor.node.clone()], [tensor.graph.clone()])
+            .memory_bound()
+            .retro_forward(RetroRound::<B, D>::new(tensor.node.id.clone()))
+            .parents([&tensor])
+            .stateful()
+        {
+            OpsKind::Tracked(mut prep) => {
+                let state = prep.checkpoint(&tensor);
+                prep.finish(state, B::float_round(tensor.primitive))
+            }
+            OpsKind::UnTracked(prep) => prep.finish(B::float_round(tensor.primitive)),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]

@@ -660,6 +660,18 @@ where
     ) -> Self {
         Self::new(K::random(shape.into(), distribution, device))
     }
+
+    pub fn floor(self) -> Self {
+        Self::new(K::floor(self.primitive))
+    }
+
+    pub fn ceil(self) -> Self {
+        Self::new(K::ceil(self.primitive))
+    }
+
+    pub fn round(self) -> Self {
+        Self::new(K::round(self.primitive))
+    }
 }
 
 impl<B, K> Tensor<B, 2, K>
@@ -1789,6 +1801,10 @@ where
         distribution: Distribution,
         device: &B::Device,
     ) -> Self::Primitive<D>;
+
+    fn floor<const D: usize>(tensor: Self::Primitive<D>) -> Self::Primitive<D>;
+    fn ceil<const D: usize>(tensor: Self::Primitive<D>) -> Self::Primitive<D>;
+    fn round<const D: usize>(tensor: Self::Primitive<D>) -> Self::Primitive<D>;
 }
 
 impl<B: Backend> Numeric<B> for Int {
@@ -2084,6 +2100,18 @@ impl<B: Backend> Numeric<B> for Int {
         device: &<B as Backend>::Device,
     ) -> Self::Primitive<D> {
         B::int_random(shape, distribution, device)
+    }
+
+    fn floor<const D: usize>(tensor: Self::Primitive<D>) -> Self::Primitive<D> {
+        tensor
+    }
+
+    fn ceil<const D: usize>(tensor: Self::Primitive<D>) -> Self::Primitive<D> {
+        tensor
+    }
+
+    fn round<const D: usize>(tensor: Self::Primitive<D>) -> Self::Primitive<D> {
+        tensor
     }
 }
 
@@ -2381,6 +2409,18 @@ impl<B: Backend> Numeric<B> for Float {
         device: &<B as Backend>::Device,
     ) -> Self::Primitive<D> {
         B::float_random(shape, distribution, device)
+    }
+
+    fn floor<const D: usize>(tensor: Self::Primitive<D>) -> Self::Primitive<D> {
+        tensor
+    }
+
+    fn ceil<const D: usize>(tensor: Self::Primitive<D>) -> Self::Primitive<D> {
+        tensor
+    }
+
+    fn round<const D: usize>(tensor: Self::Primitive<D>) -> Self::Primitive<D> {
+        tensor
     }
 }
 
