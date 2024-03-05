@@ -64,7 +64,7 @@ pub fn train<B: AutodiffBackend, D: Dataset<TextGenerationItem> + 'static>(
     let accum = 6; // Effective batch size = 6 * 6 = 32.
     let optim = config.optimizer.init();
     let lr_scheduler = NoamLrSchedulerConfig::new(LEARNING_RATE / accum as f64)
-        .with_warmup_steps(6000)
+        .with_warmup_steps(WARMUP_STEPS)
         .with_model_size(config.transformer.d_model)
         .init();
 
