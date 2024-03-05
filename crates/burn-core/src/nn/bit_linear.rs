@@ -23,6 +23,9 @@ pub struct BitLinearConfig {
     /// The type of function used to initialize neural network parameters
     #[config(default = "Initializer::KaimingUniform{gain:1.0/sqrt(3.0), fan_out_only:false}")]
     pub initializer: Initializer,
+    /// If the input tensor should be normalized.
+    #[config(default = true)]
+    pub input_norm: bool,
 }
 
 /// Applies a linear transformation to the input tensor:
@@ -36,7 +39,8 @@ pub struct BitLinear<B: Backend> {
     /// Vector of size `d_output` initialized from a uniform distribution:
     ///     `U(-k, k)`, where `k = sqrt(1 / d_input)`
     pub bias: Option<Param<Tensor<B, 1>>>,
-    pub norm: LayerNorm<B>,
+    /// Layer normalization to apply to the input tensor.
+    pub norm: Option<LayerNorm<B>>,
 }
 
 impl BitLinearConfig {
@@ -56,11 +60,16 @@ impl BitLinearConfig {
         } else {
             None
         };
+        let norm = if self.input_norm {
+            Some(LayerNormConfig::new(self.d_input).init(device))
+        } else {
+            None
+        };
 
         BitLinear {
             weight: Param::from(weight),
             bias: bias.map(Param::from),
-            norm: LayerNormConfig::new(self.d_input).init(device),
+            norm,
         }
     }
 
@@ -69,7 +78,9 @@ impl BitLinearConfig {
         BitLinear {
             weight: record.weight,
             bias: record.bias,
-            norm: LayerNormConfig::new(self.d_input).init_with(record.norm),
+            norm: record
+                .norm
+                .map(|n| LayerNormConfig::new(self.d_input).init_with(n)),
         }
     }
 }
@@ -87,15 +98,21 @@ impl<B: Backend> BitLinear<B> {
         let eps = 1e-5;
 
         let w = self.weight.val();
-        let w_gamma = w.clone().abs().mean().reshape([0usize;0]); // L1 norm
+        let w_gamma = w.clone().abs().mean().reshape([0usize; 0]); // L1 norm
         let w_ = w.clone().detach() / (w_gamma.clone() + eps).unsqueeze();
         let w_ = w_.round().clamp(-1.0, 1.0);
         let w_ = (w_ - w.clone()).detach() + w; // STE
 
-        let input = self.norm.forward(input.clone()); // TODO
-        let input_gamma = input.clone().abs().max().reshape([0usize;0]); // L-infinity norm
-        let input_ = (input.clone().detach() * ((input_gamma.clone() + eps).recip() * qb).unsqueeze())
-            .clamp(-qb + eps, qb - eps);
+        let input = if let Some(norm) = &self.norm {
+            norm.forward(input)
+        } else {
+            input
+        };
+
+        let input_gamma = input.clone().abs().max().reshape([0usize; 0]); // L-infinity norm
+        let input_ = (input.clone().detach()
+            * ((input_gamma.clone() + eps).recip() * qb).unsqueeze())
+        .clamp(-qb + eps, qb - eps);
         let input_ = (input_ - input.clone()).detach() + input.clone(); // STE
 
         let y = input_.clone().matmul(w_.unsqueeze());

@@ -16,6 +16,7 @@ pub mod pool;
 /// Transformer module
 pub mod transformer;
 
+/// Bit transformer module
 pub mod bit_transformer;
 
 mod bit_linear;

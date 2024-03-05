@@ -9,6 +9,12 @@ type Elem = f32;
 type Backend = burn::backend::Autodiff<burn::backend::LibTorch<Elem>>;
 
 fn main() {
+    if cfg!(feature = "bitnet") {
+        log::info!("Using BitNet");
+    } else {
+        log::info!("Using regular Transformer");
+    }
+
     let config = ExperimentConfig::new(
         text_generation::transformer::TransformerEncoderConfig::new(384, 1536, 12, 6)
             .with_norm_first(true),
