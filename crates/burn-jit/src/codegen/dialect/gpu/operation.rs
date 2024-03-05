@@ -53,6 +53,9 @@ pub enum Operator {
     Not(UnaryOperator),
     Max(BinaryOperator),
     Min(BinaryOperator),
+    Floor(UnaryOperator),
+    Ceil(UnaryOperator),
+    Round(UnaryOperator),
 }
 
 /// All metadata that can be access in a shader.

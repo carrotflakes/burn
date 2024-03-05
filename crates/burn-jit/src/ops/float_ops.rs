@@ -517,15 +517,39 @@ impl<R: Runtime> FloatTensorOps<Self> for JitBackend<R> {
         permute(tensor, axes)
     }
 
-    fn float_floor<const D: usize>(_tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
-        todo!()
+    fn float_floor<const D: usize>(tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
+        unary!(
+            operation: |scope: &mut Scope, elem: Elem| Operator::Floor(UnaryOperator {
+                input: scope.read_array(0, elem),
+                out: scope.create_local(elem),
+            }),
+            runtime: R,
+            input: tensor,
+            elem: FloatElem<Self>
+        )
     }
 
-    fn float_ceil<const D: usize>(_tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
-        todo!()
+    fn float_ceil<const D: usize>(tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
+        unary!(
+            operation: |scope: &mut Scope, elem: Elem| Operator::Ceil(UnaryOperator {
+                input: scope.read_array(0, elem),
+                out: scope.create_local(elem),
+            }),
+            runtime: R,
+            input: tensor,
+            elem: FloatElem<Self>
+        )
     }
 
-    fn float_round<const D: usize>(_tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
-        todo!()
+    fn float_round<const D: usize>(tensor: FloatTensor<Self, D>) -> FloatTensor<Self, D> {
+        unary!(
+            operation: |scope: &mut Scope, elem: Elem| Operator::Round(UnaryOperator {
+                input: scope.read_array(0, elem),
+                out: scope.create_local(elem),
+            }),
+            runtime: R,
+            input: tensor,
+            elem: FloatElem<Self>
+        )
     }
 }

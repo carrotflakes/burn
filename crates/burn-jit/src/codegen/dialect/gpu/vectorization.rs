@@ -74,6 +74,9 @@ impl Operator {
             Operator::And(op) => Operator::And(op.vectorize(vectorization)),
             Operator::Or(op) => Operator::Or(op.vectorize(vectorization)),
             Operator::Not(op) => Operator::Not(op.vectorize(vectorization)),
+            Operator::Floor(op) => Operator::Floor(op.vectorize(vectorization)),
+            Operator::Ceil(op) => Operator::Ceil(op.vectorize(vectorization)),
+            Operator::Round(op) => Operator::Round(op.vectorize(vectorization)),
         }
     }
 }

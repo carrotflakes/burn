@@ -1,6 +1,6 @@
 use burn_tensor::Element;
 use libm::{exp, fabs, log, log1p, pow, sqrt};
-use libm::{expf, fabsf, log1pf, logf, powf, sqrtf};
+use libm::{expf, fabsf, log1pf, logf, powf, sqrtf, floorf, ceilf, roundf};
 use ndarray::LinalgScalar;
 
 /// A float element for ndarray backend.
@@ -33,6 +33,9 @@ pub trait ExpElement {
     fn sqrt_elem(self) -> Self;
     fn abs_elem(self) -> Self;
     fn int_abs_elem(self) -> Self;
+    fn floor_elem(self) -> Self;
+    fn ceil_elem(self) -> Self;
+    fn round_elem(self) -> Self;
 }
 
 impl FloatNdArrayElement for f64 {}
@@ -91,6 +94,21 @@ macro_rules! make_elem {
             fn int_abs_elem(self) -> Self {
                 (self as i64).abs() as $ty
             }
+
+            #[inline(always)]
+            fn floor_elem(self) -> Self {
+                self
+            }
+
+            #[inline(always)]
+            fn ceil_elem(self) -> Self {
+                self
+            }
+
+            #[inline(always)]
+            fn round_elem(self) -> Self {
+                self
+            }
         }
     };
     (
@@ -144,6 +162,21 @@ macro_rules! make_elem {
             #[inline(always)]
             fn int_abs_elem(self) -> Self {
                 (self as i32).abs() as $ty
+            }
+
+            #[inline(always)]
+            fn floor_elem(self) -> Self {
+                floorf(self as f32) as $ty
+            }
+
+            #[inline(always)]
+            fn ceil_elem(self) -> Self {
+                ceilf(self as f32) as $ty
+            }
+
+            #[inline(always)]
+            fn round_elem(self) -> Self {
+                roundf(self as f32) as $ty
             }
         }
     };

@@ -495,20 +495,26 @@ impl<E: FloatNdArrayElement> FloatTensorOps<Self> for NdArray<E> {
     }
 
     fn float_floor<const D: usize>(
-        _tensor: burn_tensor::ops::FloatTensor<Self, D>,
+        tensor: burn_tensor::ops::FloatTensor<Self, D>,
     ) -> burn_tensor::ops::FloatTensor<Self, D> {
-        todo!()
+        let array = tensor.array.mapv_into(|a| a.floor_elem()).into_shared();
+
+        NdArrayTensor::new(array)
     }
 
     fn float_ceil<const D: usize>(
-        _tensor: burn_tensor::ops::FloatTensor<Self, D>,
+        tensor: burn_tensor::ops::FloatTensor<Self, D>,
     ) -> burn_tensor::ops::FloatTensor<Self, D> {
-        todo!()
+        let array = tensor.array.mapv_into(|a| a.ceil_elem()).into_shared();
+
+        NdArrayTensor::new(array)
     }
 
     fn float_round<const D: usize>(
-        _tensor: burn_tensor::ops::FloatTensor<Self, D>,
+        tensor: burn_tensor::ops::FloatTensor<Self, D>,
     ) -> burn_tensor::ops::FloatTensor<Self, D> {
-        todo!()
+        let array = tensor.array.mapv_into(|a| a.round_elem()).into_shared();
+
+        NdArrayTensor::new(array)
     }
 }
