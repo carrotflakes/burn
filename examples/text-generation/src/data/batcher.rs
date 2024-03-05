@@ -60,3 +60,21 @@ impl<B: Backend> Batcher<TextGenerationItem, TrainingTextGenerationBatch<B>>
         TrainingTextGenerationBatch::new(inputs, targets, mask_pad)
     }
 }
+
+impl TextGenerationBatcher {
+    pub fn batch_from_tokens<B: Backend>(&self, tokens: &[usize]) -> TextGenerationBatch<B> {
+        let tokens_list = vec![tokens.to_vec()];
+
+        let mask = generate_padding_mask(
+            self.tokenizer.pad_token(),
+            tokens_list,
+            Some(self.max_seq_length),
+            &B::Device::default(),
+        );
+
+        TextGenerationBatch {
+            tokens: mask.tensor,
+            mask_pad: mask.mask,
+        }
+    }
+}

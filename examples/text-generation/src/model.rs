@@ -1,4 +1,4 @@
-use crate::data::TrainingTextGenerationBatch;
+use crate::data::{TextGenerationBatch, TrainingTextGenerationBatch};
 use crate::transformer::*;
 use burn::{
     nn::{
@@ -37,6 +37,29 @@ impl TextGenerationModelConfig {
             EmbeddingConfig::new(self.vocab_size, self.transformer.d_model).init(device);
         let embedding_pos =
             EmbeddingConfig::new(self.max_seq_length, self.transformer.d_model).init(device);
+
+        TextGenerationModel {
+            transformer,
+            embedding_token,
+            embedding_pos,
+            output,
+            vocab_size: self.vocab_size,
+            pad_token: self.pad_token,
+            max_seq_length: self.max_seq_length,
+        }
+    }
+
+    pub fn init_with<B: Backend>(
+        &self,
+        record: TextGenerationModelRecord<B>,
+    ) -> TextGenerationModel<B> {
+        let output =
+            LinearConfig::new(self.transformer.d_model, self.vocab_size).init_with(record.output);
+        let transformer = self.transformer.init_with(record.transformer);
+        let embedding_token = EmbeddingConfig::new(self.vocab_size, self.transformer.d_model)
+            .init_with(record.embedding_token);
+        let embedding_pos = EmbeddingConfig::new(self.max_seq_length, self.transformer.d_model)
+            .init_with(record.embedding_pos);
 
         TextGenerationModel {
             transformer,
@@ -90,6 +113,34 @@ impl<B: Backend> TextGenerationModel<B> {
             output: output_flatten,
             targets: targets_flatten,
         }
+    }
+
+    /// Defines forward pass for inference
+    pub fn infer(&self, item: TextGenerationBatch<B>) -> Tensor<B, 3> {
+        let [batch_size, seq_length] = item.tokens.dims();
+        let device = &self.devices()[0];
+
+        let inputs = item.tokens.to_device(device);
+        let mask_pad = item.mask_pad.to_device(device);
+
+        let index_positions = Tensor::arange(0..seq_length as i64, device)
+            .reshape([1, seq_length])
+            .repeat(0, batch_size);
+
+        let embedding_positions = self.embedding_pos.forward(index_positions);
+        let embedding_tokens = self.embedding_token.forward(inputs);
+        let embedding = (embedding_positions + embedding_tokens) / 2;
+
+        let mask_attn = generate_autoregressive_mask::<B>(batch_size, seq_length, device);
+        let encoded = self.transformer.forward(
+            TransformerEncoderInput::new(embedding)
+                .mask_pad(mask_pad)
+                .mask_attn(mask_attn),
+        );
+
+        let output = self.output.forward(encoded);
+
+        output
     }
 }
 

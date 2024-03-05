@@ -11,7 +11,7 @@ use burn::{
     lr_scheduler::noam::NoamLrSchedulerConfig,
     optim::AdamConfig,
     prelude::*,
-    record::{CompactRecorder, DefaultRecorder, Recorder},
+    record::{CompactRecorder, Recorder},
     tensor::backend::AutodiffBackend,
     train::{
         metric::{AccuracyMetric, CudaMetric, LearningRateMetric, LossMetric},
@@ -22,10 +22,10 @@ use std::sync::Arc;
 
 #[derive(Config)]
 pub struct ExperimentConfig {
-    transformer: TransformerEncoderConfig,
+    pub transformer: TransformerEncoderConfig,
     optimizer: AdamConfig,
     #[config(default = 512)]
-    max_seq_length: usize,
+    pub max_seq_length: usize,
     #[config(default = 6)]
     batch_size: usize,
     #[config(default = 50)]
@@ -86,7 +86,7 @@ pub fn train<B: AutodiffBackend, D: Dataset<TextGenerationItem> + 'static>(
 
     config.save(format!("{artifact_dir}/config.json")).unwrap();
 
-    DefaultRecorder::new()
+    CompactRecorder::new()
         .record(
             model_trained.into_record(),
             format!("{artifact_dir}/model").into(),
