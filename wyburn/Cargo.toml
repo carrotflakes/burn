@@ -1,0 +1,11 @@
+[package]
+name = "wyburn"
+edition.workspace = true
+version.workspace = true
+readme.workspace = true
+license.workspace = true
+
+[dependencies]
+burn-core = { path = "../crates/burn-core", version = "0.13.0", default-features = true }
+burn-tensor = { path = "../crates/burn-tensor", version = "0.13.0", default-features = false }
+burn-ndarray = { path = "../crates/burn-ndarray", version = "0.13.0", default-features = false }
