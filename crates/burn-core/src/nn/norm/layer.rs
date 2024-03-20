@@ -21,8 +21,8 @@ pub struct LayerNormConfig {
 /// `Y = norm(X) * γ + β`
 #[derive(Module, Debug)]
 pub struct LayerNorm<B: Backend> {
-    gamma: Param<Tensor<B, 1>>,
-    beta: Param<Tensor<B, 1>>,
+    pub gamma: Param<Tensor<B, 1>>,
+    pub beta: Param<Tensor<B, 1>>,
     epsilon: f64,
 }
 

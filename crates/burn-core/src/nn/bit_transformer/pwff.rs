@@ -45,6 +45,7 @@ impl PositionWiseFeedForwardConfig {
         PositionWiseFeedForward {
             linear_inner: BitLinearConfig::new(self.d_model, self.d_ff)
                 .with_initializer(self.initializer.clone())
+                .with_input_norm(false)
                 .init(device),
             linear_outer: BitLinearConfig::new(self.d_ff, self.d_model)
                 .with_initializer(self.initializer.clone())
@@ -60,8 +61,11 @@ impl PositionWiseFeedForwardConfig {
         record: PositionWiseFeedForwardRecord<B>,
     ) -> PositionWiseFeedForward<B> {
         PositionWiseFeedForward {
-            linear_inner: BitLinearConfig::new(self.d_model, self.d_ff).init_with(record.linear_inner),
-            linear_outer: BitLinearConfig::new(self.d_ff, self.d_model).init_with(record.linear_outer),
+            linear_inner: BitLinearConfig::new(self.d_model, self.d_ff)
+                .with_input_norm(false)
+                .init_with(record.linear_inner),
+            linear_outer: BitLinearConfig::new(self.d_ff, self.d_model)
+                .init_with(record.linear_outer),
             dropout: DropoutConfig::new(self.dropout).init(),
             gelu: Gelu::new(),
         }

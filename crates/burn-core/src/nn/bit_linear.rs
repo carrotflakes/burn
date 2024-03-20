@@ -77,6 +77,7 @@ impl BitLinearConfig {
     pub fn init_with<B: Backend>(&self, record: BitLinearRecord<B>) -> BitLinear<B> {
         BitLinear {
             weight: record.weight,
+            // binarized_weight: todo!(),
             bias: record.bias,
             norm: record
                 .norm
@@ -101,13 +102,15 @@ impl<B: Backend> BitLinear<B> {
         let w_gamma = w.clone().abs().mean().reshape([0usize; 0]); // L1 norm
         let w_ = w.clone().detach() / (w_gamma.clone() + eps).unsqueeze();
         let w_ = w_.round().clamp(-1.0, 1.0);
-        let w_ = (w_ - w.clone()).detach() + w; // STE
+        let w_ = (w_ - w.clone()).detach() + w.clone(); // STE
 
         let input = if let Some(norm) = &self.norm {
             norm.forward(input)
         } else {
             input
         };
+
+        return input.clone().matmul(w_.unsqueeze()).mul_scalar(w_gamma.into_scalar());
 
         let input_gamma = input.clone().abs().max().reshape([0usize; 0]); // L-infinity norm
         let input_ = (input.clone().detach()
@@ -126,6 +129,7 @@ impl<B: Backend> BitLinear<B> {
         let beta = w_gamma;
         let gamma = input_gamma;
         let y = y * (beta * gamma / qb).unsqueeze();
+        // let y = y * (gamma / qb).unsqueeze();
 
         y
     }

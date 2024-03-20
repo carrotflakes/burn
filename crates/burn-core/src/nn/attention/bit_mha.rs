@@ -75,17 +75,18 @@ pub struct BitMhaInput<B: Backend> {
 impl BitMultiHeadAttentionConfig {
     /// Initialize a new [multihead attention](MultiHeadAttention) module.
     pub fn init<B: Backend>(&self, device: &B::Device) -> BitMultiHeadAttention<B> {
-        let linear = |config: &Self| {
+        let linear = |config: &Self, norm: bool| {
             nn::BitLinearConfig::new(config.d_model, config.d_model)
                 .with_initializer(self.initializer.clone())
+                .with_input_norm(norm)
                 .init(device)
         };
 
         BitMultiHeadAttention {
-            query: linear(self),
-            key: linear(self),
-            value: linear(self),
-            output: linear(self),
+            query: linear(self, false),
+            key: linear(self, false),
+            value: linear(self, false),
+            output: linear(self, true),
             dropout: nn::DropoutConfig::new(self.dropout).init(),
             activation: nn::Gelu::new(),
             n_heads: self.n_heads,
@@ -202,7 +203,11 @@ impl<B: Backend> BitMultiHeadAttention<B> {
     /// - key: `[batch_size, seq_length_2, d_model]`
     /// - value: `[batch_size, seq_length_2, d_model]`
     /// - output: `[batch_size, seq_length_1, d_model]`
-    pub fn forward_cache(&self, input: BitMhaInput<B>, cache: &mut BitMhaCache<B>) -> BitMhaOutput<B> {
+    pub fn forward_cache(
+        &self,
+        input: BitMhaInput<B>,
+        cache: &mut BitMhaCache<B>,
+    ) -> BitMhaOutput<B> {
         let [batch_size, seq_length_1, d_model] = input.query.dims();
 
         let query = cache

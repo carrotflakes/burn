@@ -17,9 +17,14 @@ fn main() {
 
     let config = ExperimentConfig::new(
         text_generation::transformer::TransformerEncoderConfig::new(384, 1536, 12, 6)
-            .with_norm_first(true),
+            .with_norm_first(if cfg!(feature = "bitnet") {
+                true
+            } else {
+                true
+            }),
         burn::optim::AdamConfig::new().with_weight_decay(Some(WeightDecayConfig::new(1.0e-6))),
-    );
+    )
+    .with_num_epochs(4);
 
     text_generation::training::train::<Backend, DbPediaDataset>(
         if cfg!(target_os = "macos") {

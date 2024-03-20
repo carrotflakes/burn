@@ -11,7 +11,7 @@ members = [
     "crates/burn-import/onnx-tests",
     "examples/*",
     "examples/pytorch-import/model",
-    "xtask",
+    "xtask", "bitnet",
 ]
 
 exclude = ["examples/notebook"]

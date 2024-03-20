@@ -45,7 +45,7 @@ pub fn infer<B: Backend>(
 
     // Run inference on the given text samples
     println!("Running inference ...");
-    let mut input_tokens = tokenizer.encode(&text, true);
+    let mut input_tokens = tokenizer.encode(&text, false);
     let mut output_tokens = Vec::new();
     for _ in 0..len {
         let item: TextGenerationBatch<B> = batcher.batch_from_tokens(&input_tokens);

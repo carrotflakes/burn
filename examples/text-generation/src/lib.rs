@@ -26,6 +26,6 @@ pub mod transformer {
         Linear, LinearConfig,
     };
 
-    pub const LEARNING_RATE: f64 = 0.01;
-    pub const WARMUP_STEPS: usize = 6000;
+    pub const LEARNING_RATE: f64 = 4.0;
+    pub const WARMUP_STEPS: usize = 100;
 }

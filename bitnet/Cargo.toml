@@ -1,0 +1,25 @@
+[package]
+name = "bitnet"
+edition.workspace = true
+version.workspace = true
+readme.workspace = true
+license.workspace = true
+
+[features]
+default = ["burn/dataset", "burn/sqlite-bundled"]
+f16 = []
+
+[dependencies]
+# Burn
+burn = {path = "../crates/burn", features=["train", "ndarray"]}
+
+# Tokenizer
+tokenizers = {version = "0.15.2", default-features = false, features = [
+  "onig",
+  "http",
+]}
+
+# Utils
+derive-new = {workspace = true}
+log = {workspace = true}
+serde = {workspace = true, features = ["std", "derive"]}

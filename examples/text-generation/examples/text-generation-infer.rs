@@ -3,7 +3,7 @@ type Elem = burn::tensor::f16;
 #[cfg(not(feature = "f16"))]
 type Elem = f32;
 
-type Backend = burn::backend::Autodiff<burn::backend::LibTorch<Elem>>;
+type Backend = burn::backend::LibTorch<Elem>;
 
 fn main() {
     if cfg!(feature = "bitnet") {
@@ -19,7 +19,7 @@ fn main() {
             burn::tensor::Device::<Backend>::Cuda(0)
         },
         "/tmp/text-generation",
-        "The US".to_owned(),
+        "[START]how".to_owned(),
         64,
     );
 }

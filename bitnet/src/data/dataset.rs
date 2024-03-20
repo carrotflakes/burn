@@ -7,7 +7,6 @@ pub struct TextGenerationItem {
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct DbPediaItem {
-    #[serde(rename = "question")]
     pub content: String,
 }
 
@@ -36,7 +35,7 @@ impl DbPediaDataset {
         Self::new("test")
     }
     pub fn new(split: &str) -> Self {
-        let dataset: SqliteDataset<DbPediaItem> = HuggingfaceDatasetLoader::new("wiki_qa") // dbpedia_14
+        let dataset: SqliteDataset<DbPediaItem> = HuggingfaceDatasetLoader::new("dbpedia_14")
             .dataset(split)
             .unwrap();
         Self { dataset }
