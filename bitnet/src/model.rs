@@ -277,10 +277,11 @@ impl LayerNorm {
 
 #[derive(Debug, Clone)]
 pub struct Linear {
+    #[allow(dead_code)]
     d_input: usize,
     d_output: usize,
-    weights_p: Vec<u64>,
-    weights_n: Vec<u64>,
+    weights_p: Vec<(usize, usize)>,
+    weights_n: Vec<(usize, usize)>,
     norm: Option<LayerNorm>,
 }
 
@@ -289,8 +290,8 @@ impl Linear {
         Linear {
             d_input,
             d_output,
-            weights_p: vec![0; (d_input * d_output + 64 - 1) / 64],
-            weights_n: vec![0; (d_input * d_output + 64 - 1) / 64],
+            weights_p: vec![],
+            weights_n: vec![],
             norm: None,
         }
     }
@@ -299,17 +300,16 @@ impl Linear {
         d_input: usize,
         d_output: usize,
         weights: &Vec<f32>,
-        scale: f32,
+        _scale: f32,
         norm: Option<LayerNorm>,
     ) -> Self {
-        let mut weights_p = vec![0; (d_input * d_output + 64 - 1) / 64];
-        let mut weights_n = vec![0; (d_input * d_output + 64 - 1) / 64];
+        let mut weights_p = vec![];
+        let mut weights_n = vec![];
         for i in 0..d_input * d_output {
-            let j = i % d_output * d_input + i / d_output;
             if weights[i] > 0.0 {
-                weights_p[j / 64] |= 1 << (j % 64);
+                weights_p.push((i / d_output, i % d_output));
             } else if weights[i] < 0.0 {
-                weights_n[j / 64] |= 1 << (j % 64);
+                weights_n.push((i / d_output, i % d_output));
             }
         }
         Linear {
@@ -322,16 +322,15 @@ impl Linear {
     }
 
     pub fn eye(d_input: usize, d_output: usize) -> Self {
-        let mut weights_p = vec![0; (d_input * d_output + 64 - 1) / 64];
-        let weights_n = vec![0; (d_input * d_output + 64 - 1) / 64];
+        let mut weights_p = vec![];
         for i in 0..d_input.min(d_output) {
-            weights_p[i * d_output / 64] |= 1 << (i * d_output % 64);
+            weights_p.push((i, i));
         }
         Linear {
             d_input,
             d_output,
             weights_p,
-            weights_n,
+            weights_n: vec![],
             norm: None,
         }
     }
@@ -343,17 +342,11 @@ impl Linear {
         }
 
         let mut output = vec![0; self.d_output];
-        for i in 0..self.d_output {
-            let mut sum = 0i32;
-            for j in 0..self.d_input {
-                let k = i * self.d_input + j;
-                if self.weights_p[k / 64] & (1 << (k % 64)) != 0 {
-                    sum += input[j] as i32;
-                } else if self.weights_n[k / 64] & (1 << (k % 64)) != 0 {
-                    sum -= input[j] as i32;
-                }
-            }
-            output[i] = sum;
+        for (i, j) in &self.weights_p {
+            output[*j] += input[*i];
+        }
+        for (i, j) in &self.weights_n {
+            output[*j] -= input[*i];
         }
         let max = output.iter().map(|x| x.abs()).max().unwrap();
         let output = output.into_iter().map(|x| x * 127 / max).collect();
